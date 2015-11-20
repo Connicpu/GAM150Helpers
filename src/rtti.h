@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -42,11 +43,15 @@ Any Any$from_double(double d);
 Any Any$from_cstr(const char *cstr);
 // Note that this function takes ownership of the value
 Any Any$from_complex(const Type *type, void *value);
+Any Any$ref_complex(const Type *type, void *value);
 Any Any$copy(Any obj);
 void Any$unpack(Any boxed, void *placement);
 void Any$free(Any *boxed);
 void Any$freev(Any boxed);
+void Any$soft_release(Any *boxed);
+void Any$delete_ref(Any *boxed);
 Any Any$invoke(Any self, const char *member_name, unsigned arg_count, Any *args);
+void Any$print(Any obj, FILE *stream);
 
 /////////////////////////////////////
 // Type types
@@ -144,6 +149,7 @@ extern Type type_size_t;
 extern Type type_float;
 extern Type type_double;
 extern Type type_cstr;
+extern Type type_any;
 
 /////////////////////////////////////
 // Other statics

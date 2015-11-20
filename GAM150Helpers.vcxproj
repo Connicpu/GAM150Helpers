@@ -133,11 +133,13 @@
     <ClCompile Include="src\main.c" />
     <ClCompile Include="src\rtti.c" />
     <ClCompile Include="src\string.c" />
+    <ClCompile Include="src\vector.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\helpers.h" />
     <ClInclude Include="src\rtti.h" />
     <ClInclude Include="src\string.h" />
+    <ClInclude Include="src\vector.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

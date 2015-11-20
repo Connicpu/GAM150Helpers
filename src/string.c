@@ -30,9 +30,9 @@ String String$copy(const String *this)
 
 void String$free(String *this)
 {
-    if (this->_cap)
+    if (this->cap)
     {
-        free(this->_data);
+        free(this->data);
     }
 
     *this = String$EMPTY;
@@ -47,20 +47,20 @@ String String$from_cstr(const char *str)
 String String$from_literal(const char *lit)
 {
     String ref;
-    ref._data = (char *)lit; // _cap=0 guarantees _data will be treated as const
-    ref._len = (unsigned)strlen(lit);
-    ref._cap = 0;
+    ref.data = (char *)lit; // _cap=0 guarantees _data will be treated as const
+    ref.len = (unsigned)strlen(lit);
+    ref.cap = 0;
     return ref;
 }
 
 const char *String$cstr(const String *this)
 {
-    return this->_data;
+    return this->data;
 }
 
 size_t String$len(const String *this)
 {
-    return this->_len;
+    return this->len;
 }
 
 bool String$equal(String lhs, String rhs)
@@ -70,14 +70,14 @@ bool String$equal(String lhs, String rhs)
 
 int String$compare(String lhs, String rhs)
 {
-    return strcmp(lhs._data, rhs._data);
+    return strcmp(lhs.data, rhs.data);
 }
 
 void String$reserve(String *this, size_t minimum)
 {
     // If our capacity isn't enough for minimum plus
     // a NUL terminator, grow it
-    if (this->_cap <= minimum + 1)
+    if (this->cap <= minimum + 1)
     {
         String$grow(this, minimum);
     }
@@ -86,63 +86,63 @@ void String$reserve(String *this, size_t minimum)
 void String$append(String *this, String rhs)
 {
     // Ensure the string can fit [this.., rhs.., '\0']
-    String$reserve(this, this->_len + rhs._len);
+    String$reserve(this, this->len + rhs.len);
     // Copy rhs into our data
-    memcpy(this->_data + this->_len, rhs._data, rhs._len);
+    memcpy(this->data + this->len, rhs.data, rhs.len);
     // Increment the length
-    this->_len += rhs._len;
+    this->len += rhs.len;
     // Apply the NUL terminator
-    this->_data[this->_len] = 0;
+    this->data[this->len] = 0;
 }
 
 void String$prepend(String *this, String rhs)
 {
     // Ensure the string can fit [rhs.., this.., '\0']
-    String$reserve(this, this->_len + rhs._len);
+    String$reserve(this, this->len + rhs.len);
     // Shift the string over
-    memmove(this->_data + rhs._len, this->_data, this->_len);
+    memmove(this->data + rhs.len, this->data, this->len);
     // Copy the new prefix in
-    memcpy(this->_data, rhs._data, rhs._len);
+    memcpy(this->data, rhs.data, rhs.len);
     // Increment the length
-    this->_len += rhs._len;
+    this->len += rhs.len;
     // Apply the NUL terminator
-    this->_data[this->_len] = 0;
+    this->data[this->len] = 0;
 }
 
 void String$push(String *this, char c)
 {
     // Ensure there is room to push a character
-    String$reserve(this, this->_len + 1);
+    String$reserve(this, this->len + 1);
     // Push a character
-    this->_data[this->_len++] = c;
+    this->data[this->len++] = c;
     // Push the NUL terminator
-    this->_data[this->_len] = 0;
+    this->data[this->len] = 0;
 }
 
 void String$pop(String *this)
 {
     // There is no popping to do if the string is empty
-    if (!this->_len)
+    if (!this->len)
     {
         return;
     }
 
     // Make sure we own the string
-    if (!this->_cap)
+    if (!this->cap)
     {
-        String$reserve(this, this->_len);
+        String$reserve(this, this->len);
     }
 
     // Pop a character
-    this->_data[--this->_len] = 0;
+    this->data[--this->len] = 0;
 }
 
 static size_t String$extra_cap(const String *this)
 {
-    if (this->_cap)
+    if (this->cap)
     {
         // Subtract 1 to maintain the cstr property
-        return this->_cap - this->_len - 1;
+        return this->cap - this->len - 1;
     }
     else
     {
@@ -162,16 +162,16 @@ static void String$grow(String *this, size_t minimum)
 
     // Ensure this new minimum isn't less than the string
     // we're already storing
-    if (minimum < this->_len)
+    if (minimum < this->len)
     {
-        minimum = this->_len;
+        minimum = this->len;
     }
 
     // Try to double the size, but if that isn't
     // big enough just set it to the minumum required
-    if (this->_cap * 2 >= minimum + 1)
+    if (this->cap * 2 >= minimum + 1)
     {
-        new_size = this->_cap * 2;
+        new_size = this->cap * 2;
     }
     else
     {
@@ -181,21 +181,21 @@ static void String$grow(String *this, size_t minimum)
     // If the string has already been allocated by us,
     // we can just use realloc. Otherwise, we have to malloc
     // new space and copy the string we didn't own in.
-    if (this->_cap)
+    if (this->cap)
     {
-        char *temp = realloc(this->_data, new_size);
+        char *temp = realloc(this->data, new_size);
         assert(temp && "Uh oh, memory allocation failed");
-        this->_data = temp;
+        this->data = temp;
     }
     else
     {
         char *temp = malloc(new_size);
         assert(temp && "Uh oh, memory allocation failed");
-        memcpy(temp, this->_data, this->_len);
-        temp[this->_len] = 0;
-        this->_data = temp;
+        memcpy(temp, this->data, this->len);
+        temp[this->len] = 0;
+        this->data = temp;
     }
-    this->_cap = new_size;
+    this->cap = new_size;
 }
 
 ///////////////////////////////////////////////
@@ -226,7 +226,7 @@ static Any rtti_constructor(void *obj, unsigned arg_count, Any *arguments)
             {
                 String temp, copied;
                 Any$unpack(arguments[0], &temp);
-                arguments[0] = Any$EMPTY;
+                Any$soft_release(&arguments[0]);
 
                 copied = String$copy(&temp);
                 result = Any$from_complex(&type_string, &temp);
@@ -279,7 +279,7 @@ static Any rtti_destructor(void *obj, unsigned arg_count, Any *arguments)
     (arguments); // unreferenced parameter
     assert(arg_count == 0);
     String$free((String *)obj);
-    return Any$EMPTY;
+    return Any$VOID;
 }
 
 static Member destructor_member =

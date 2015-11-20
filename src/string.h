@@ -36,7 +36,7 @@ extern struct Type type_string;
 extern struct Type type_string_ptr;
 struct String
 {
-    char *_data;
-    size_t _len;
-    size_t _cap;
+    char *data;
+    size_t len;
+    size_t cap;
 };
