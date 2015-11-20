@@ -195,6 +195,7 @@ static void String$grow(String *this, size_t minimum)
         temp[this->_len] = 0;
         this->_data = temp;
     }
+    this->_cap = new_size;
 }
 
 ///////////////////////////////////////////////
@@ -361,6 +362,43 @@ static Member append_member =
     false, // overloaded
 };
 
+static Any rtti_prepend(void *obj, unsigned arg_count, Any *arguments)
+{
+    assert(arg_count == 1);
+
+    String *this = (String *)obj;
+    if (arguments[0].type == &type_string || arguments[1].type == &type_string_ptr)
+    {
+        String *rhs = (String *)arguments[0].value.ptr;
+        String$prepend(this, *rhs);
+    }
+    else if (arguments[0].type == &type_cstr)
+    {
+        String$prepend(this, String$from_literal(arguments[0].value.cstr));
+    }
+    else
+    {
+        assert(false && "Invalid type passed to String$append");
+    }
+
+    return Any$VOID;
+}
+
+static Type *prepend_args[] =
+{
+    &type_string
+};
+
+static Member prepend_member =
+{
+    "prepend",
+    rtti_prepend,
+    ARRAY_SIZE(prepend_args), prepend_args, // Args
+    &type_void, // Return type
+    false, // static
+    false, // overloaded
+};
+
 static Member *member_list[] =
 {
     &constructor_member,
@@ -368,6 +406,7 @@ static Member *member_list[] =
     &cstr_member,
     &len_member,
     &append_member,
+    &prepend_member,
 };
 
 struct Type type_string =

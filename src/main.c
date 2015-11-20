@@ -14,6 +14,13 @@ int main(void)
     // Print it out
     puts(Any$invoke(str, "cstr", 0, NULL).value.cstr);
 
+    // Prepend a value
+    value = Any$from_cstr("You Are ");
+    Any$invoke(str, "prepend", 1, &value);
+
+    // Print it out
+    puts(Any$invoke(str, "cstr", 0, NULL).value.cstr);
+
     // Free the str
     Any$free(&str);
 
